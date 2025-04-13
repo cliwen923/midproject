@@ -2,7 +2,7 @@ name: Fetch Bitcoin Price
 
 on:
   schedule:
-    - cron: '* * * * *'  # 每分鐘執行一次
+    - cron: '0 0 * * *'  # 每分鐘執行一次
   workflow_dispatch:
 
 jobs:
@@ -44,3 +44,4 @@ jobs:
           commit_message: "Update Bitcoin price data every minute"
           file_pattern: static.json static.csv
           token: ${{ github.token }}
+          push_options: '--force'  # 添加這一行來強制推送
