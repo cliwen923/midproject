@@ -1,0 +1,46 @@
+name: Fetch Bitcoin Price
+
+on:
+  schedule:
+    - cron: '* * * * *'  # 每分鐘執行一次
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Delete existing CSV file (if any)
+        run: rm -f static.csv
+
+      - name: Run scraper
+        run: python static.py
+
+      - name: Fetch and reset to remote
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+          git fetch origin
+          git reset --hard origin/main
+
+      - name: Commit and push changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Update Bitcoin price data every minute"
+          file_pattern: static.json static.csv
+          token: ${{ github.token }}
